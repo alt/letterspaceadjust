@@ -1,0 +1,328 @@
+% \iffalse
+%<*driver>
+%% File: letterspaceadjust.dtx by Arno Trautmann, mail: arno dot trautmann at gmx dot de
+\iffalse
+%</driver>
+%<*readme>
+This is the README file of the letterspaceadjust package. The package provides several commands and Lua functions to manipulate the input or output tokens of any Lua(La)TeX document. It serves mostly educational and playful usage, but some functions may be used in serious documents.
+
+To produce the package files, run lualatex on chickinize.dtx, wich should result in the creation of the following files:
+  letterspaceadjust.pdf  (documentation)
+  letterspaceadjust.tex  (plainTeX user interface)
+  letterspaceadjust.sty  (LaTeX user interface)
+  letterspaceadjust.lua  (Lua package code) [does the actual work]
+
+You need an up-to-date TeX Live (2012, if possible, maybe 2011 will do) to use this package. Maybe a full MiKTeX will will also work. (Not tested!)
+
+For any comments or suggestions, contact me:
+arno dot trautmann at gmx dot de
+
+Hope you have fun with this package!
+
+This package is copyright © 2013 Arno L. Trautmann. It may be distributed and/or
+modified under the conditions of the LaTeX Project Public License, either version 1.3c
+of this license or (at your option) any later version. This work has the LPPL mainten-
+ance status ‘maintained’.
+%</readme>
+%<*driver>
+\fi
+\def\nameofplainTeX{plain}
+\ifx\fmtname\nameofplainTeX\else
+  \expandafter\begingroup
+\fi
+\input docstrip.tex
+\keepsilent
+\let\MetaPrefix\relax
+\preamble
+
+EXPERIMENTAL CODE
+
+This package is copyright © 2013 Arno L. Trautmann. It may be distributed and/or
+modified under the conditions of the LaTeX Project Public License, either version 1.3c
+of this license or (at your option) any later version. This work has the LPPL mainten-
+ance status ‘maintained’.
+\endpreamble
+\let\MetaPrefix\DoubleperCent
+\postamble
+\endpostamble
+\askforoverwritefalse
+
+\generate{\file{letterspaceadjust.sty}{\from{letterspaceadjust.dtx}{package}}}
+\generate{\file{letterspaceadjust.tex}{\from{letterspaceadjust.dtx}{tex}}}
+\def\MetaPrefix{-- }
+\def\luapostamble{%
+  \MetaPrefix^^J%
+  \MetaPrefix\space End of File `\outFileName'.%
+}
+\def\currentpostamble{\luapostamble}%
+
+\generate{\file{letterspaceadjust.lua}{\from{letterspaceadjust.dtx}{lua}}}
+\nopreamble\nopostamble
+\catcode`\@12
+
+%\generate{\file{README.}{\from{letterspaceadjust.dtx}{readme}}}
+% readme will not be generated until I figured out how to write a file without extension
+
+
+\ifx\fmtname\nameofplainTeX
+  \expandafter\endbatchfile
+\else
+  \expandafter\endgroup
+\fi
+\documentclass[11pt,english]{ltxdoc}
+\usepackage{
+  array,
+  babel,
+  booktabs,
+  fontspec,
+  geometry,
+  graphicx,
+  hyperref,
+  longtable,
+  microtype,
+  paralist,
+  scrpage2,
+  tabu
+}
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue,
+  filecolor=blue,
+  urlcolor=blue
+}
+
+\cfoot{\pagemark}
+\ohead{}
+\pagestyle{scrheadings}
+\setmainfont{Linux Libertine O}
+\setsansfont{Linux Biolinum O}
+\newfontfamily\XITS{XITS}
+\newfontfamily\TGChorus{TeX Gyre Chorus}
+
+\usepackage{letterspaceadjust}
+\microtypesetup{stretch=45}
+
+\begin{document}
+\begin{center}
+\fontsize{35}{0}\selectfont letterspaceadjust
+\end{center}
+
+\centerline{v0.0a}
+\centerline{\hspace*{2cm} Arno Trautmann}
+\centerline{\href{mailto:arno.trautmann@gmx.de}{arno.trautmann@gmx.de}}
+
+\kern.5cm
+This is the documentation of the package |letterspaceadjust|. It is not documented so far.
+
+\emph{Attention}: This package is under development and everything presented here might be subject to incompatible changes.
+
+If you have any suggestions or comments, just drop me a mail, I’ll be happy to get any response! The latet source code is hosted on github: \url{https://github.com/alt/letterspaceadjust}. Feel free to comment or report bugs there, to fork, pull, etc.
+
+\vfill
+
+\small\noindent
+\fbox{\parbox{.97\textwidth}{
+This package is copyright © 2013 Arno L. Trautmann. It may be distributed and/or
+modified under the conditions of the LaTeX Project Public License, either version 1.3c
+of this license or (at your option) any later version. This work has the LPPL maintenance status ‘maintained’.}}
+\vspace*{1cm}
+
+\newpage
+\tableofcontents
+\newpage
+\part{User Documentation}
+\section{What is this about?}
+This package provides an experimental approach of improving the result of typesetting in very narrow columns. For this, the distance between letters is stretched evenly by a very small amount – in the best case so small that you hardly notice. In the worst case so much that it disturbs the reading. This very implementation is just for testing purposes – please play around with the parameters and report your results so I can see whether this package will be of any use. If so, an official CTAN release will follow when the package is stable and useable.
+
+\section{How do I use it?}
+The basic macro of this package is \verb|\letterspaceadjust|. Using this macro, one activates the additional spacing for the rest of the document – until an \verb|\unletterspaceadjust| stops it. These macros work per paragraph, so you cannot (de)activate it for single lines. For this, you can use the macro \verb|\textletterspaceadjust| or \verb|\textlsa{}| which activates spacing for everything inside the braces.
+
+\subsection{Controlling the parameters}
+Using letterspaceadjust without the \textsf{microtype} package is dumb. Therefore, the package requires \textsf{microtype} and offers two commands for convenience to change the \textsf{microtype} parameters. These are just shorthands and shall help in finding good parameters:
+\begin{description}
+\item[\texttt{\textbackslash lsamicrostretch\{\}}] Changes the amount by which glyphs are extended. Default value in \textsf{microtype} is 20 (measured in 1/1000, so 20 means glyphs are extended at max. 2\% of their width) However, I find that values up to 40 are useable and improve the result in narrow columns. Try it out. A larger expansion also helps to increase the greyness which is needed when we increase the letter spacing.
+\item[\texttt{\textbackslash lsamicroshrink\{\}}] Same for the amount of shrinking. By default, this is also set to 20 and if not changed explicitely, the shrink value is the same as the stretch value. I think that the shrinking should not be increased when using \textsf{letterspaceadjust}, so try setting (i.\,e. keeping) it to 20.
+\end{description}
+
+The second way of maybe improving the quality of very narrow columns is to increase the value of \verb|\emergencystretch|. In simple words, this is the amount of additional stretchable material that is added if \TeX\ cannot find a good solution of the paragraph. This may lead to very loose columns, but that is exactly what the letterspacing will improve. So a larger emergencystretch will help us here. Maybe. If you really want to understand what \verb|\emergencystretch| does, please consult the \TeX book.
+\begin{description}
+\item[\texttt{\textbackslash lsaemergency\{\}}] Sets the additional stretchable material. Try values below \texttt{1em} or so. Use font related units (as \texttt{em}) to be independent of the current font.
+\end{description}
+
+Finally, there are macros that directly change what this package does. Mainly this is the amount of spacing that is used between the glyphs. This value should be very small; everything above \texttt{0.05em} looks too loose and unreadable.
+\begin{description}
+\item[\texttt{\textbackslash lsastretch\{\}}] Sets the amount of stretch to be inserted between the glyphs. Values below \texttt{0.05em} seem reasonable.
+\end{description}
+In a final version of this package, there will be of course a key-value interface and also a set of predefined values à la “very strong letterspacing”, “light letterspacing” etc. Do not forget to consider the \verb|\textletterspaceadjust|-variant to be used when the linewidth changes during the paragraph. (e.\,g. pictures in the text)
+
+\subsection{Example use}
+For testing, you might want to consider the following example. Remember that you cannot change the amount of \textsf{microtype}s stretching after \verb|\begin{document}|, therefore I cannot show different expansions here.
+
+The examples are typeset with the following setting, from left to right. The amount of font expansion in this document is set more than twice as high as the default value (45 instead of 20) to show more effect.\\
+
+\begin{compactitem}
+\item without expansion or letterspacing,
+\item with expansion, but without letterspacing
+\item without expansion, but with letterspacing
+\item with expansion and letterspacing
+\end{compactitem}
+\vspace{.3cm}
+
+\parbox[t]{2cm}{\microtypesetup{expansion=false}%
+This is a small text with some words that should show how to use this package.}\hfill%
+\parbox[t]{2cm}{\microtypesetup{expansion=true}%
+This is a small text with some words that should show how to use this package.}\hfill%
+%
+\letterspaceadjust
+\parbox[t]{2.2cm}{\microtypesetup{expansion=false}%
+This is a small text with some words that should show how to use this package.}\hfill%
+\parbox[t]{2.2cm}{\microtypesetup{expansion=true}%
+This is a small text with some words that should show how to use this package.}
+\hfill\hfill
+\\ \\
+
+\noindent
+The default values correspond to the following settings:
+\begin{verbatim}
+\lsaemergency{0.0em}
+\lsastretch{0.02em}
+\lsamicrostretch{20}
+\lsamicroshrink{20}
+\end{verbatim}
+
+\textcolor{red}{\emph{Be careful!}} Due to the implementation, it is not possible to change the amount of space inserted on one page. That may change, but for now, do \emph{not} try to change the value of \verb|\lsastretch| during the document, this will result in completely wrong spacing.
+
+Explanation for this: When the spacing is inserted, \TeX\ sets the amount of stretching of the corresponding space, not the absolute value it should have. Now, using \verb|\lsastretch|, you change the amount of stretchability as all inserted spacings point to the same glue node. Then the spaces are still stretched by the same factor, but being larger, e.\,g., the absolute space will be too large and the lines will be too long!
+
+This could be changed by using a new \verb|glue_spec| node every time \verb|\lsastretch| is called, and maybe a final implementation will do this. Until that, please use only one value for \verb|\lsastretch| per document, or at least per page (that should work mostly).
+
+\DocInput{letterspaceadjust.dtx}
+\end{document}
+%</driver>
+%<*package>
+% \fi
+% \clearpage
+%\part{Implementation}
+%\label{sec:implementation}
+%\section{The \LaTeX\ package: letterspaceadjust.sty}
+% Everything to get stuff working from the \TeX\ side. Here, only a .sty file is provided and plain/Con\TeX t users have to find their way. I'll happily support them, though!
+% 
+% The Lua file is not found by using a simple |dofile("letterspaceadjust.lua")| call, but we have to use kpse's |find_file|.
+%    \begin{macrocode}
+\ProvidesPackage{letterspaceadjust}%
+  [2013/03/10 v0.0a letterspaceadjust package]
+\input{luatexbase.sty}
+\directlua{dofile(kpse.find_file("letterspaceadjust.lua"))}
+%    \end{macrocode}
+% Commands for (un-)registering the functions in the callbacks.
+%    \begin{macrocode}
+\def\letterspaceadjust{\directlua{luatexbase.add_to_callback(%
+  "pre_linebreak_filter",letterspaceadjust,"letterspaceadjust")}}
+\def\unletterspaceadjust{
+  \directlua{luatexbase.remove_from_callback("pre_linebreak_filter","letterspaceadjust")}}
+%    \end{macrocode}
+% Synonyms, just to be funny:
+%    \begin{macrocode}
+\let\stealsheep\letterspaceadjust     %% synonym in honor of Paul
+\let\unstealsheep\unletterspaceadjust
+\let\returnsheep\unletterspaceadjust
+%    \end{macrocode}
+% Now the setup for the |\text|-versions. We utilize Lua\TeX s attributes to mark all nodes that should be manipulated. The macros should be |\long| to allow arbitrary input. 
+%    \begin{macrocode}
+\newluatexattribute\letterspaceadjustattr
+
+\long\def\textletterspaceadjust#1{
+  \setluatexattribute\letterspaceadjustattr{42}#1\unsetluatexattribute\letterspaceadjustattr
+  \directlua{
+    if (textletterspaceadjustactive) then else % -- if already active, do nothing
+      luatexbase.add_to_callback(
+        "pre_linebreak_filter",textletterspaceadjust,"textletterspaceadjust")
+    end
+    textletterspaceadjustactive = true         % -- set to active
+  }
+}
+\let\textlsa\textletterspaceadjust
+%    \end{macrocode}
+% Macros to control the behaviour of the package. First, macros that go to the microtype package:
+%    \begin{macrocode}
+\def\lsamicrostretch#1{\microtypesetup{stretch=#1}}
+\def\lsamicroshrink#1{\microtypesetup{shrink=#1}}
+%    \end{macrocode}
+% Then a macro that just executes \verb|\emergencystretch=#1|
+%    \begin{macrocode}
+\def\lsaemergency#1{\emergencystretch=#1}
+%    \end{macrocode}
+% Finlly, the parameters of the lua function, mainly the amount of stretchability.
+%    \begin{macrocode}
+\def\lsastretch#1{%
+  \directlua{letterspace_spec.stretch = tex.sp"#1"}%
+}
+%    \end{macrocode}
+%\iffalse
+%</package>
+%<*lua>
+%\fi
+% \section{Lua Module}
+% \label{sec:luamodule}
+% This file contains all the necessary functions and is the actual work horse of this package.
+% Yet another piece of code by Paul. This is primarily inteded for very narrow columns, but may also increase the overall quality of typesetting. Basically, it does nothing else than adding expandable space \emph{between} letters. This way, the amount of stretching between words can be reduced which will, hopefully, result in the greyness to be more equally distributed over the page.
+%
+% Why the synonym |stealsheep|? Because of a comment of Paul on the |texhax| mailing list: \url{http://tug.org/pipermail/texhax/2011-October/018374.html}
+% \subsection{setup of variables}
+% First, we set up some constants that are used by many of the following functions. These are made global so the code can be manipulated at the document level, too.
+%    \begin{macrocode}
+local nodenew = node.new
+local nodecopy = node.copy
+local nodeinsertbefore = node.insert_before
+local nodeinsertafter = node.insert_after
+local nodeid = node.id
+local nodetraverseid = node.traverse_id
+
+Hhead = nodeid("hhead")
+RULE = nodeid("rule")
+GLUE = nodeid("glue")
+WHAT = nodeid("whatsit")
+COL = node.subtype("pdf_colorstack")
+GLYPH = nodeid("glyph")
+
+local letterspace_glue = nodenew(nodeid"glue")
+letterspace_spec = nodenew(nodeid"glue_spec")
+local letterspace_pen = nodenew(nodeid"penalty")
+
+letterspace_spec.width   = tex.sp"0pt"
+letterspace_spec.stretch = tex.sp"0.02em"
+letterspace_glue.spec    = letterspace_spec
+letterspace_pen.penalty  = 10000
+%    \end{macrocode}
+% \subsection{function implementation}
+%    \begin{macrocode}
+letterspaceadjust = function(head)
+  for glyph in nodetraverseid(nodeid"glyph", head) do
+    if glyph.prev and (glyph.prev.id == nodeid"glyph" or glyph.prev.id == nodeid"disc" or glyph.prev.id == nodeid"kern") then
+      local g = nodecopy(letterspace_glue)
+      nodeinsertbefore(head, glyph, g)
+      nodeinsertbefore(head, g, nodecopy(letterspace_pen))
+    end
+  end
+  return head
+end
+%    \end{macrocode}
+% \subsection{textletterspaceadjust}
+% The |\text...|-version of |letterspaceadjust|. Just works, without the need to call |\letterspaceadjust| globally or anything else. Just put the |\textletterspaceadjust| around the part of text you want the function to work on. Might have problems with surrounding spacing, take care!
+%    \begin{macrocode}
+textletterspaceadjust = function(head)
+  for glyph in nodetraverseid(nodeid"glyph", head) do
+    if node.has_attribute(glyph,luatexbase.attributes.letterspaceadjustattr) then
+      if glyph.prev and (glyph.prev.id == node.id"glyph" or glyph.prev.id == node.id"disc") then
+        local g = node.copy(letterspace_glue)
+        nodeinsertbefore(head, glyph, g)
+        nodeinsertbefore(head, g, nodecopy(letterspace_pen))
+      end
+    end
+  end
+  luatexbase.remove_from_callback("pre_linebreak_filter","textletterspaceadjust")
+  return head
+end
+%    \end{macrocode}
+% \Finale
+% \endinput
