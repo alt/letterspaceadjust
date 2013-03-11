@@ -26,13 +26,15 @@ WHAT = nodeid("whatsit")
 COL = node.subtype("pdf_colorstack")
 GLYPH = nodeid("glyph")
 
-local letterspace_glue = nodenew(nodeid"glue")
-letterspace_spec = nodenew(nodeid"glue_spec")
+lsa_stretch_ind = 1
+letterspace_spec = {}
+letterspace_spec[lsa_stretch_ind] = nodenew(nodeid"glue_spec")
+letterspace_glue = nodenew(nodeid"glue")
 local letterspace_pen = nodenew(nodeid"penalty")
 
 letterspace_spec.width   = tex.sp"0pt"
-letterspace_spec.stretch = tex.sp"0.02em"
-letterspace_glue.spec    = letterspace_spec
+letterspace_spec[lsa_stretch_ind].stretch = tex.sp"0.02em"
+letterspace_glue.spec    = letterspace_spec[lsa_stretch_ind]
 letterspace_pen.penalty  = 10000
 letterspaceadjust = function(head)
   for glyph in nodetraverseid(nodeid"glyph", head) do

@@ -13,7 +13,7 @@
 %% of this license or (at your option) any later version. This work has the LPPL mainten-
 %% ance status ‘maintained’.
 \ProvidesPackage{letterspaceadjust}%
-  [2013/03/10 v0.0a letterspaceadjust package]
+  [2013/03/10 v0.0b letterspaceadjust package]
 \input{luatexbase.sty}
 \directlua{dofile(kpse.find_file("letterspaceadjust.lua"))}
 \def\letterspaceadjust{\directlua{luatexbase.add_to_callback(%
@@ -40,7 +40,12 @@
 \def\lsamicroshrink#1{\microtypesetup{shrink=#1}}
 \def\lsaemergency#1{\emergencystretch=#1}
 \def\lsastretch#1{%
-  \directlua{letterspace_spec.stretch = tex.sp"#1"}%
+  \directlua{
+    lsa_stretch_ind = lsa_stretch_ind + 1
+    letterspace_spec[lsa_stretch_ind] = node.copy(letterspace_spec[1])
+    letterspace_glue.spec    = letterspace_spec[lsa_stretch_ind]
+    letterspace_spec[lsa_stretch_ind].stretch = tex.sp"#1"
+  }%
 }
 %% 
 %%

@@ -190,12 +190,6 @@ The default values correspond to the following settings:
 \lsamicroshrink{20}
 \end{verbatim}
 
-\textcolor{red}{\emph{Be careful!}} Due to the implementation, it is not possible to change the amount of space inserted on one page. That may change, but for now, do \emph{not} try to change the value of \verb|\lsastretch| during the document, this will result in completely wrong spacing.
-
-Explanation for this: When the spacing is inserted, \TeX\ sets the amount of stretching of the corresponding space, not the absolute value it should have. Now, using \verb|\lsastretch|, you change the amount of stretchability as all inserted spacings point to the same glue node. Then the spaces are still stretched by the same factor, but being larger, e.\,g., the absolute space will be too large and the lines will be too long!
-
-This could be changed by using a new \verb|glue_spec| node every time \verb|\lsastretch| is called, and maybe a final implementation will do this. Until that, please use only one value for \verb|\lsastretch| per document, or at least per page (that should work mostly).
-
 \DocInput{letterspaceadjust.dtx}
 \end{document}
 %</driver>
@@ -210,7 +204,7 @@ This could be changed by using a new \verb|glue_spec| node every time \verb|\lsa
 % The Lua file is not found by using a simple |dofile("letterspaceadjust.lua")| call, but we have to use kpse's |find_file|.
 %    \begin{macrocode}
 \ProvidesPackage{letterspaceadjust}%
-  [2013/03/10 v0.0a letterspaceadjust package]
+  [2013/03/10 v0.0b letterspaceadjust package]
 \input{luatexbase.sty}
 \directlua{dofile(kpse.find_file("letterspaceadjust.lua"))}
 %    \end{macrocode}
@@ -255,7 +249,12 @@ This could be changed by using a new \verb|glue_spec| node every time \verb|\lsa
 % Finlly, the parameters of the lua function, mainly the amount of stretchability.
 %    \begin{macrocode}
 \def\lsastretch#1{%
-  \directlua{letterspace_spec.stretch = tex.sp"#1"}%
+  \directlua{
+    lsa_stretch_ind = lsa_stretch_ind + 1
+    letterspace_spec[lsa_stretch_ind] = node.copy(letterspace_spec[1])
+    letterspace_glue.spec    = letterspace_spec[lsa_stretch_ind]
+    letterspace_spec[lsa_stretch_ind].stretch = tex.sp"#1"
+  }%
 }
 %    \end{macrocode}
 %\iffalse
@@ -285,13 +284,15 @@ WHAT = nodeid("whatsit")
 COL = node.subtype("pdf_colorstack")
 GLYPH = nodeid("glyph")
 
-local letterspace_glue = nodenew(nodeid"glue")
-letterspace_spec = nodenew(nodeid"glue_spec")
+lsa_stretch_ind = 1
+letterspace_spec = {}
+letterspace_spec[lsa_stretch_ind] = nodenew(nodeid"glue_spec")
+letterspace_glue = nodenew(nodeid"glue")
 local letterspace_pen = nodenew(nodeid"penalty")
 
 letterspace_spec.width   = tex.sp"0pt"
-letterspace_spec.stretch = tex.sp"0.02em"
-letterspace_glue.spec    = letterspace_spec
+letterspace_spec[lsa_stretch_ind].stretch = tex.sp"0.02em"
+letterspace_glue.spec    = letterspace_spec[lsa_stretch_ind]
 letterspace_pen.penalty  = 10000
 %    \end{macrocode}
 % \subsection{function implementation}
