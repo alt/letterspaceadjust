@@ -15,11 +15,24 @@
 \ProvidesPackage{letterspaceadjust}%
   [2013/03/10 v0.0b letterspaceadjust package]
 \input{luatexbase.sty}
+\RequirePackage{luacode}
 \directlua{dofile(kpse.find_file("letterspaceadjust.lua"))}
-\def\letterspaceadjust{\directlua{luatexbase.add_to_callback(%
-  "pre_linebreak_filter",letterspaceadjust,"letterspaceadjust")}}
+\def\letterspaceadjust{
+  \directlua{
+    if (lsakeepligatures == false) then
+      luatexbase.remove_from_callback("pre_linebreak_filter","luaotfload.pre_linebreak_filter")
+    end
+    luatexbase.add_to_callback("pre_linebreak_filter",letterspaceadjust,"letterspaceadjust")
+  }
+}
 \def\unletterspaceadjust{
-  \directlua{luatexbase.remove_from_callback("pre_linebreak_filter","letterspaceadjust")}}
+  \directlua{
+    luatexbase.remove_from_callback("pre_linebreak_filter","letterspaceadjust")
+    if (lsakeepligatures == false) then
+      luatexbase.add_to_callback("pre_linebreak_filter",nodes.simple_font_handler,"luaotfload.pre_linebreak_filter")
+    end
+  }
+}
 \let\stealsheep\letterspaceadjust     %% synonym in honor of Paul
 \let\unstealsheep\unletterspaceadjust
 \let\returnsheep\unletterspaceadjust
@@ -46,6 +59,9 @@
     letterspace_glue.spec    = letterspace_spec[lsa_stretch_ind]
     letterspace_spec[lsa_stretch_ind].stretch = tex.sp"#1"
   }%
+}
+\def\lsakeepligatures{
+  \directlua{lsakeepligatures = true}
 }
 %% 
 %%

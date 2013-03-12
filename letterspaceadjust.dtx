@@ -107,16 +107,22 @@ ance status ‘maintained’.
 \fontsize{35}{0}\selectfont letterspaceadjust
 \end{center}
 
-\centerline{v0.0a}
+\centerline{v0.0b}
 \centerline{\hspace*{2cm} Arno Trautmann}
 \centerline{\href{mailto:arno.trautmann@gmx.de}{arno.trautmann@gmx.de}}
 
 \kern.5cm
-This is the documentation of the package |letterspaceadjust|. It is not documented so far.
+\begin{abstract}
+The package \textsf{letterspaceadjust} offers a simple way to increase the typographic quality of very narrow columns. This is achieved by inserting stretchable space between all glyphs, so the text can be spaced out more evenly. The result is \emph{not} very nice, but maybe the best to achieve in narrow columns.
+\end{abstract}
 
-\emph{Attention}: This package is under development and everything presented here might be subject to incompatible changes.
+This is the documentation of the package |letterspaceadjust|. The package provides an experimental approach of improving the result of typesetting in very narrow columns. For this, the distance between letters is stretched evenly by a very small amount – in the best case so small that you hardly notice. In the worst case so much that it disturbs the reading. This very implementation is just for testing purposes – please play around with the parameters and report your results so I can see whether this package will be of any use. If so, an official CTAN release will follow when the package is stable and useable.
+\vspace{1cm}
 
-If you have any suggestions or comments, just drop me a mail, I’ll be happy to get any response! The latet source code is hosted on github: \url{https://github.com/alt/letterspaceadjust}. Feel free to comment or report bugs there, to fork, pull, etc.
+\textcolor{red}{\emph{Attention}}: This package is under development and everything presented here might and will be subject to incompatible changes.
+
+If you have any suggestions or comments, just drop me a mail, I’ll be happy to get any response! The latest source code is hosted on github – Feel free to comment or report bugs there, to fork, pull, etc.:
+\url{https://github.com/alt/letterspaceadjust}\\
 
 \vfill
 
@@ -131,11 +137,10 @@ of this license or (at your option) any later version. This work has the LPPL ma
 \tableofcontents
 \newpage
 \part{User Documentation}
-\section{What is this about?}
-This package provides an experimental approach of improving the result of typesetting in very narrow columns. For this, the distance between letters is stretched evenly by a very small amount – in the best case so small that you hardly notice. In the worst case so much that it disturbs the reading. This very implementation is just for testing purposes – please play around with the parameters and report your results so I can see whether this package will be of any use. If so, an official CTAN release will follow when the package is stable and useable.
-
 \section{How do I use it?}
 The basic macro of this package is \verb|\letterspaceadjust|. Using this macro, one activates the additional spacing for the rest of the document – until an \verb|\unletterspaceadjust| stops it. These macros work per paragraph, so you cannot (de)activate it for single lines. For this, you can use the macro \verb|\textletterspaceadjust| or \verb|\textlsa{}| which activates spacing for everything inside the braces.
+
+There is one feature I'm not sure about so far: Ligatures. For large interglyph spacing, it doesn't look right to let ligatures together. However, breaking them looks bad in the case of small or no additional spacing. Now, that's your job: Test what looks best for you and report it to me. This package will support both versions, however I wonder what the default value should be. For now, it is breaking of ligatures which will start when calling \verb|\letterspaceadjust| and stop by \verb|\unletterspaceadjust|. Everything outside will be ligatured normally. For all this, \textsf{fontspe} (actually \textsf{luaotfload}) is assumed as ligaturing there happens at another place than is normally thought for. (In the \verb|pre_linebreak_filter| instead of the \verb|ligaturing| callback).
 
 \subsection{Controlling the parameters}
 Using letterspaceadjust without the \textsf{microtype} package is dumb. Therefore, the package requires \textsf{microtype} and offers two commands for convenience to change the \textsf{microtype} parameters. These are just shorthands and shall help in finding good parameters:
@@ -152,6 +157,7 @@ The second way of maybe improving the quality of very narrow columns is to incre
 Finally, there are macros that directly change what this package does. Mainly this is the amount of spacing that is used between the glyphs. This value should be very small; everything above \texttt{0.05em} looks too loose and unreadable.
 \begin{description}
 \item[\texttt{\textbackslash lsastretch\{\}}] Sets the amount of stretch to be inserted between the glyphs. Values below \texttt{0.05em} seem reasonable.
+\item[\texttt{\textbackslash lsakeepligatures}] Keep the ligatures as they are. May look bad with large interglyph spacing.
 \end{description}
 In a final version of this package, there will be of course a key-value interface and also a set of predefined values à la “very strong letterspacing”, “light letterspacing” etc. Do not forget to consider the \verb|\textletterspaceadjust|-variant to be used when the linewidth changes during the paragraph. (e.\,g. pictures in the text)
 
@@ -206,14 +212,27 @@ The default values correspond to the following settings:
 \ProvidesPackage{letterspaceadjust}%
   [2013/03/10 v0.0b letterspaceadjust package]
 \input{luatexbase.sty}
+\RequirePackage{luacode}
 \directlua{dofile(kpse.find_file("letterspaceadjust.lua"))}
 %    \end{macrocode}
 % Commands for (un-)registering the functions in the callbacks.
 %    \begin{macrocode}
-\def\letterspaceadjust{\directlua{luatexbase.add_to_callback(%
-  "pre_linebreak_filter",letterspaceadjust,"letterspaceadjust")}}
+\def\letterspaceadjust{
+  \directlua{
+    if (lsakeepligatures == false) then
+      luatexbase.remove_from_callback("pre_linebreak_filter","luaotfload.pre_linebreak_filter")
+    end
+    luatexbase.add_to_callback("pre_linebreak_filter",letterspaceadjust,"letterspaceadjust")
+  }
+}
 \def\unletterspaceadjust{
-  \directlua{luatexbase.remove_from_callback("pre_linebreak_filter","letterspaceadjust")}}
+  \directlua{
+    luatexbase.remove_from_callback("pre_linebreak_filter","letterspaceadjust")
+    if (lsakeepligatures == false) then
+      luatexbase.add_to_callback("pre_linebreak_filter",nodes.simple_font_handler,"luaotfload.pre_linebreak_filter")
+    end
+  }
+}
 %    \end{macrocode}
 % Synonyms, just to be funny:
 %    \begin{macrocode}
@@ -257,6 +276,12 @@ The default values correspond to the following settings:
   }%
 }
 %    \end{macrocode}
+\def\lsakeepligatures{
+  \directlua{lsakeepligatures = true}
+}
+%    \begin{macrocode}
+% 
+%    \end{macrocode}
 %\iffalse
 %</package>
 %<*lua>
@@ -270,6 +295,9 @@ The default values correspond to the following settings:
 % \subsection{setup of variables}
 % First, we set up some constants that are used by many of the following functions. These are made global so the code can be manipulated at the document level, too.
 %    \begin{macrocode}
+
+lsakeepligatures = false
+
 local nodenew = node.new
 local nodecopy = node.copy
 local nodeinsertbefore = node.insert_before

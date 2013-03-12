@@ -12,6 +12,9 @@
 --  modified under the conditions of the LaTeX Project Public License, either version 1.3c
 --  of this license or (at your option) any later version. This work has the LPPL mainten-
 --  ance status ‘maintained’.
+
+lsakeepligatures = false
+
 local nodenew = node.new
 local nodecopy = node.copy
 local nodeinsertbefore = node.insert_before
