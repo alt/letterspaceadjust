@@ -15,6 +15,8 @@
 \ProvidesPackage{letterspaceadjust}%
   [2013/03/10 v0.0b letterspaceadjust package]
 \input{luatexbase.sty}
+\RequirePackage{expl3}
+\RequirePackage{xparse}
 \RequirePackage{luacode}
 \directlua{dofile(kpse.find_file("letterspaceadjust.lua"))}
 \def\letterspaceadjust{
@@ -36,19 +38,6 @@
 \let\stealsheep\letterspaceadjust     %% synonym in honor of Paul
 \let\unstealsheep\unletterspaceadjust
 \let\returnsheep\unletterspaceadjust
-\newluatexattribute\letterspaceadjustattr
-
-\long\def\textletterspaceadjust#1{
-  \setluatexattribute\letterspaceadjustattr{42}#1\unsetluatexattribute\letterspaceadjustattr
-  \directlua{
-    if (textletterspaceadjustactive) then else % -- if already active, do nothing
-      luatexbase.add_to_callback(
-        "pre_linebreak_filter",textletterspaceadjust,"textletterspaceadjust")
-    end
-    textletterspaceadjustactive = true         % -- set to active
-  }
-}
-\let\textlsa\textletterspaceadjust
 \def\lsamicrostretch#1{\microtypesetup{stretch=#1}}
 \def\lsamicroshrink#1{\microtypesetup{shrink=#1}}
 \def\lsaemergency#1{\emergencystretch=#1}
@@ -63,6 +52,33 @@
 \def\lsakeepligatures{
   \directlua{lsakeepligatures = true}
 }
+\newluatexattribute\letterspaceadjustattr
+
+\long\def\textletterspaceadjust#1{
+  \setluatexattribute\letterspaceadjustattr{42}#1\unsetluatexattribute\letterspaceadjustattr
+  \directlua{
+    if (textletterspaceadjustactive) then else % -- if already active, do nothing
+      luatexbase.add_to_callback(
+        "pre_linebreak_filter",textletterspaceadjust,"textletterspaceadjust")
+    end
+    textletterspaceadjustactive = true         % -- set to active
+  }
+}
+\let\textlsa\textletterspaceadjust
+\ExplSyntaxOn
+\keys_define:nn{letterspaceadjust}{
+  active.code:n        = \letterspaceadjust,
+  none.code:n          = \unletterspaceadjust,
+  keepligatures.code:n = \directlua{lsakeepligatures = true},
+  stretch.code:n       = \lsastretch{#1},
+
+}
+\DeclareDocumentCommand\lsasetup{m}{
+  \keys_set:nn{letterspaceadjust}{#1}
+\directlua{lsakeepligatures=true}
+\directlua{if~lsakeepligatures~then~texio.write_nl("TRUUUUUUUUUUUUU")end}
+}
+\ExplSyntaxOff
 %% 
 %%
 %% End of file `letterspaceadjust.sty'.

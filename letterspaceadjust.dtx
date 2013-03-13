@@ -8,11 +8,10 @@ This is the README file of the letterspaceadjust package. The package provides s
 
 To produce the package files, run lualatex on chickinize.dtx, wich should result in the creation of the following files:
   letterspaceadjust.pdf  (documentation)
-  letterspaceadjust.tex  (plainTeX user interface)
   letterspaceadjust.sty  (LaTeX user interface)
-  letterspaceadjust.lua  (Lua package code) [does the actual work]
+  letterspaceadjust.lua  (Lua package code)
 
-You need an up-to-date TeX Live (2012, if possible, maybe 2011 will do) to use this package. Maybe a full MiKTeX will will also work. (Not tested!)
+You need an up-to-date TeX Live (2012) to use this package. Maybe a full MiKTeX will will also work. (Not tested!)
 
 For any comments or suggestions, contact me:
 arno dot trautmann at gmx dot de
@@ -63,7 +62,6 @@ ance status ‘maintained’.
 %\generate{\file{README.}{\from{letterspaceadjust.dtx}{readme}}}
 % readme will not be generated until I figured out how to write a file without extension
 
-
 \ifx\fmtname\nameofplainTeX
   \expandafter\endbatchfile
 \else
@@ -78,9 +76,9 @@ ance status ‘maintained’.
   geometry,
   graphicx,
   hyperref,
-  longtable,
   microtype,
   paralist,
+  ragged2e,
   scrpage2,
   tabu
 }
@@ -96,16 +94,27 @@ ance status ‘maintained’.
 \pagestyle{scrheadings}
 \setmainfont{Linux Libertine O}
 \setsansfont{Linux Biolinum O}
-\newfontfamily\XITS{XITS}
-\newfontfamily\TGChorus{TeX Gyre Chorus}
 
 \usepackage{letterspaceadjust}
 \microtypesetup{stretch=45}
 
 \begin{document}
-\begin{center}
-\fontsize{35}{0}\selectfont letterspaceadjust
-\end{center}
+\centerline{\fontsize{35}{50}\selectfont letter\,s\,p\,a\,c\,e\,adjust}
+\vspace*{1cm}
+
+\letterspaceadjust
+\hfill\textcolor{blue}{
+{\fontsize{18}{15}\selectfont
+\parbox{2cm}{
+\noindent
+l\,etter\vspace*{-.5ex}\break s\,pace\vspace*{-.6ex}\break a\,djust\break
+}}\hfill
+{\fontsize{18}{15}\selectfont
+\parbox{2cm}{
+\noindent
+l\,etter\vspace*{-.5ex}\break s\,pace\vspace*{-.6ex}\break a\,djust\break
+}}\hfill}
+\unletterspaceadjust
 
 \centerline{v0.0b}
 \centerline{\hspace*{2cm} Arno Trautmann}
@@ -130,7 +139,7 @@ If you have any suggestions or comments, just drop me a mail, I’ll be happy to
 \fbox{\parbox{.97\textwidth}{
 This package is copyright © 2013 Arno L. Trautmann. It may be distributed and/or
 modified under the conditions of the LaTeX Project Public License, either version 1.3c
-of this license or (at your option) any later version. This work has the LPPL maintenance status ‘maintained’.}}
+of this license or (at your option) any later version. This work has the LPPL maintenance status ‘maintained’. Whoever notes the face in the title gets a cookie when we meet.}}
 \vspace*{1cm}
 
 \newpage
@@ -142,7 +151,7 @@ The basic macro of this package is \verb|\letterspaceadjust|. Using this macro, 
 
 There is one feature I'm not sure about so far: Ligatures. For large interglyph spacing, it doesn't look right to let ligatures together. However, breaking them looks bad in the case of small or no additional spacing. Now, that's your job: Test what looks best for you and report it to me. This package will support both versions, however I wonder what the default value should be. For now, it is breaking of ligatures which will start when calling \verb|\letterspaceadjust| and stop by \verb|\unletterspaceadjust|. Everything outside will be ligatured normally. For all this, \textsf{fontspe} (actually \textsf{luaotfload}) is assumed as ligaturing there happens at another place than is normally thought for. (In the \verb|pre_linebreak_filter| instead of the \verb|ligaturing| callback).
 
-\subsection{Controlling the parameters}
+\subsection{User Commands}
 Using letterspaceadjust without the \textsf{microtype} package is dumb. Therefore, the package requires \textsf{microtype} and offers two commands for convenience to change the \textsf{microtype} parameters. These are just shorthands and shall help in finding good parameters:
 \begin{description}
 \item[\texttt{\textbackslash lsamicrostretch\{\}}] Changes the amount by which glyphs are extended. Default value in \textsf{microtype} is 20 (measured in 1/1000, so 20 means glyphs are extended at max. 2\% of their width) However, I find that values up to 40 are useable and improve the result in narrow columns. Try it out. A larger expansion also helps to increase the greyness which is needed when we increase the letter spacing.
@@ -160,6 +169,16 @@ Finally, there are macros that directly change what this package does. Mainly th
 \item[\texttt{\textbackslash lsakeepligatures}] Keep the ligatures as they are. May look bad with large interglyph spacing.
 \end{description}
 In a final version of this package, there will be of course a key-value interface and also a set of predefined values à la “very strong letterspacing”, “light letterspacing” etc. Do not forget to consider the \verb|\textletterspaceadjust|-variant to be used when the linewidth changes during the paragraph. (e.\,g. pictures in the text)
+
+\subsection{User Options}
+You can change the behaviour of the package conveniently using a key-value interface. For this, use the command \verb|\lsasetup| and apply any of the following options. Take care of the order, though, some keys are only effective after others. This might change in future versions, depending on my coding experience.
+\begin{description}
+\item[active] \verb|\lsasetup{active}| activates letterspacing and is identical to \verb|\letterspaceadjust|.
+\item[none] deactivates letterspacing.
+\item[keepligatures] keeps the ligatures. Must be called \emph{before} \verb|active|.
+\item[stretch] Sets the amount of stretchability of the interglyph spaces. Use e.\,g. \verb|0.01em|.
+
+\end{description}
 
 \subsection{Example use}
 For testing, you might want to consider the following example. Remember that you cannot change the amount of \textsf{microtype}s stretching after \verb|\begin{document}|, therefore I cannot show different expansions here.
@@ -206,15 +225,18 @@ The default values correspond to the following settings:
 %\label{sec:implementation}
 %\section{The \LaTeX\ package: letterspaceadjust.sty}
 % Everything to get stuff working from the \TeX\ side. Here, only a .sty file is provided and plain/Con\TeX t users have to find their way. I'll happily support them, though!
-% 
+% \subsection{Loading Files}
 % The Lua file is not found by using a simple |dofile("letterspaceadjust.lua")| call, but we have to use kpse's |find_file|.
 %    \begin{macrocode}
 \ProvidesPackage{letterspaceadjust}%
   [2013/03/10 v0.0b letterspaceadjust package]
 \input{luatexbase.sty}
+\RequirePackage{expl3}
+\RequirePackage{xparse}
 \RequirePackage{luacode}
 \directlua{dofile(kpse.find_file("letterspaceadjust.lua"))}
 %    \end{macrocode}
+% \subsection{User Commands}
 % Commands for (un-)registering the functions in the callbacks.
 %    \begin{macrocode}
 \def\letterspaceadjust{
@@ -240,6 +262,31 @@ The default values correspond to the following settings:
 \let\unstealsheep\unletterspaceadjust
 \let\returnsheep\unletterspaceadjust
 %    \end{macrocode}
+% 
+% Macros to control the behaviour of the package. First, macros that go to the microtype package:
+%    \begin{macrocode}
+\def\lsamicrostretch#1{\microtypesetup{stretch=#1}}
+\def\lsamicroshrink#1{\microtypesetup{shrink=#1}}
+%    \end{macrocode}
+% Then a macro that just executes \verb|\emergencystretch=#1|
+%    \begin{macrocode}
+\def\lsaemergency#1{\emergencystretch=#1}
+%    \end{macrocode}
+% Finally, the parameters of the lua function, mainly the amount of stretchability.
+%    \begin{macrocode}
+\def\lsastretch#1{%
+  \directlua{
+    lsa_stretch_ind = lsa_stretch_ind + 1
+    letterspace_spec[lsa_stretch_ind] = node.copy(letterspace_spec[1])
+    letterspace_glue.spec    = letterspace_spec[lsa_stretch_ind]
+    letterspace_spec[lsa_stretch_ind].stretch = tex.sp"#1"
+  }%
+}
+\def\lsakeepligatures{
+  \directlua{lsakeepligatures = true}
+}
+%    \end{macrocode}
+% \subsubsection{Text-Versions}
 % Now the setup for the |\text|-versions. We utilize Lua\TeX s attributes to mark all nodes that should be manipulated. The macros should be |\long| to allow arbitrary input. 
 %    \begin{macrocode}
 \newluatexattribute\letterspaceadjustattr
@@ -256,31 +303,23 @@ The default values correspond to the following settings:
 }
 \let\textlsa\textletterspaceadjust
 %    \end{macrocode}
-% Macros to control the behaviour of the package. First, macros that go to the microtype package:
+% \subsection{Key-Value Interface}
+% It's a modern package, so we make use of \LaTeX3 once more. Let's see how stable this is. So far, no options can be used as package option, but only inside the \verb|\lsasetup{}| macro. I'm not much into \LaTeX3 syntax and stuff anymore, so feel free to correct any non-nice coding here!
 %    \begin{macrocode}
-\def\lsamicrostretch#1{\microtypesetup{stretch=#1}}
-\def\lsamicroshrink#1{\microtypesetup{shrink=#1}}
-%    \end{macrocode}
-% Then a macro that just executes \verb|\emergencystretch=#1|
-%    \begin{macrocode}
-\def\lsaemergency#1{\emergencystretch=#1}
-%    \end{macrocode}
-% Finlly, the parameters of the lua function, mainly the amount of stretchability.
-%    \begin{macrocode}
-\def\lsastretch#1{%
-  \directlua{
-    lsa_stretch_ind = lsa_stretch_ind + 1
-    letterspace_spec[lsa_stretch_ind] = node.copy(letterspace_spec[1])
-    letterspace_glue.spec    = letterspace_spec[lsa_stretch_ind]
-    letterspace_spec[lsa_stretch_ind].stretch = tex.sp"#1"
-  }%
+\ExplSyntaxOn
+\keys_define:nn{letterspaceadjust}{
+  active.code:n        = \letterspaceadjust,
+  none.code:n          = \unletterspaceadjust,
+  keepligatures.code:n = \directlua{lsakeepligatures = true},
+  stretch.code:n       = \lsastretch{#1},
+  
 }
-%    \end{macrocode}
-\def\lsakeepligatures{
-  \directlua{lsakeepligatures = true}
+\DeclareDocumentCommand\lsasetup{m}{
+  \keys_set:nn{letterspaceadjust}{#1}
+\directlua{lsakeepligatures=true}
+\directlua{if~lsakeepligatures~then~texio.write_nl("TRUUUUUUUUUUUUU")end}
 }
-%    \begin{macrocode}
-% 
+\ExplSyntaxOff
 %    \end{macrocode}
 %\iffalse
 %</package>
