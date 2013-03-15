@@ -67,11 +67,16 @@
 \let\textlsa\textletterspaceadjust
 \ExplSyntaxOn
 \keys_define:nn{letterspaceadjust}{
-  active.code:n        = \letterspaceadjust,
-  none.code:n          = \unletterspaceadjust,
-  keepligatures.code:n = \directlua{lsakeepligatures = true},
-  stretch.code:n       = \lsastretch{#1},
-
+  active.code:n           = \letterspaceadjust,
+  destroyligatures.code:n = \directlua{lsakeepligatures = false},
+  none.code:n             = \unletterspaceadjust,
+  keepligatures.code:n    = \directlua{lsakeepligatures = true},
+  stretch.code:n          = \lsastretch{#1},
+  emergency.code:n        = {\emergencystretch=#1},
+  emergencystretch.code:n = {\emergencystretch=#1},
+  expansion.code:n        = \microtypesetup{expansion},
+  microstretch.code:n     = \microtypesetup{stretch = #1},
+  microshrink.code:n      = \microtypesetup{shrink = #1}
 }
 \DeclareDocumentCommand\lsasetup{m}{
   \keys_set:nn{letterspaceadjust}{#1}

@@ -172,12 +172,19 @@ In a final version of this package, there will be of course a key-value interfac
 
 \subsection{User Options}
 You can change the behaviour of the package conveniently using a key-value interface. For this, use the command \verb|\lsasetup| and apply any of the following options. Take care of the order, though, some keys are only effective after others. This might change in future versions, depending on my coding experience.
+
+Tho following list is in alphabetical order. Read carefully through all the keys so you don't miss any important aspects.
 \begin{description}
 \item[active] \verb|\lsasetup{active}| activates letterspacing and is identical to \verb|\letterspaceadjust|.
-\item[none] deactivates letterspacing.
+\item[destroyligatures] Will break ligatures to enable letterspacing between them. You have to deactivate letterspacing and reactivate it if you want to change this parameter. \emph{Always} call it before activating letterspacing!
+\item[emergency] Sets the \verb|\emergencystretch| to the given value. Use e.\,g. \verb|1em|. This option is offered just for convenience to have a unified interface and does nothing more than just calling |\emergencystretch|.
+\item[emergencystretch] Synonym for \verb|emergency|.
+\item[expansion] Sets the amount of font expansion via the microtype package. Again, this is just a wrapper than only calls \verb|\microtypesetup|.
 \item[keepligatures] keeps the ligatures. Must be called \emph{before} \verb|active|.
+\item[microshrink] Synonym for microtype's \verb|shrink| parameter.
+\item[microstretch] Synonym for microtype's \verb|stretch| parameter.
+\item[none] deactivates letterspacing.
 \item[stretch] Sets the amount of stretchability of the interglyph spaces. Use e.\,g. \verb|0.01em|.
-
 \end{description}
 
 \subsection{Example use}
@@ -308,11 +315,16 @@ The default values correspond to the following settings:
 %    \begin{macrocode}
 \ExplSyntaxOn
 \keys_define:nn{letterspaceadjust}{
-  active.code:n        = \letterspaceadjust,
-  none.code:n          = \unletterspaceadjust,
-  keepligatures.code:n = \directlua{lsakeepligatures = true},
-  stretch.code:n       = \lsastretch{#1},
-  
+  active.code:n           = \letterspaceadjust,
+  destroyligatures.code:n = \directlua{lsakeepligatures = false},
+  none.code:n             = \unletterspaceadjust,
+  keepligatures.code:n    = \directlua{lsakeepligatures = true},
+  stretch.code:n          = \lsastretch{#1},
+  emergency.code:n        = {\emergencystretch=#1},
+  emergencystretch.code:n = {\emergencystretch=#1},
+  expansion.code:n        = \microtypesetup{expansion},
+  microstretch.code:n     = \microtypesetup{stretch = #1},
+  microshrink.code:n      = \microtypesetup{shrink = #1}
 }
 \DeclareDocumentCommand\lsasetup{m}{
   \keys_set:nn{letterspaceadjust}{#1}
